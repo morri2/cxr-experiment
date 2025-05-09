@@ -77,14 +77,13 @@ class NoiseModule(nn.Module):
 
 
 # ------ CameraDistort ------
-
-
 from torchvision.transforms import GaussianBlur
 
 
 class CameraDistort(nn.Module):
     def __init__(self, noise_std_const=0.2, noise_std_factor=0.1, blur_sigma=3.0):
         # NOISE PARAMETERS
+        super().__init__()
         self.noise_std_const = noise_std_const
         self.noise_std_factor = noise_std_factor
         self.blur_sigma = blur_sigma
@@ -94,14 +93,15 @@ class CameraDistort(nn.Module):
         if self.blur_kernel_size % 2 == 0: # make sure its odd
             self.blur_kernel_size += 1
 
+        self.blur = GaussianBlur(self.blur_kernel_size, self.blur_sigma)
+
 
     def forward(self, x):
         # blur
-        x = GaussianBlur(self.blur_kernel_size, self.blur_sigma)(x)
+        x = self.blur(x)
         # noise
-        x = torch.normal(x, std= (x + self.noise_std_const) * self.noise_std_const)
+        x = torch.normal(x, std= (x + self.noise_std_const) * self.noise_std_factor)
         return x.clamp(0.0, 1.0)
-
 
 # ------ Denoise / Filtering ------
 

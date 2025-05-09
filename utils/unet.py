@@ -79,6 +79,7 @@ class UNet(nn.Module):
         )
         
         self.final_conv = nn.Conv2d(k, 1, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
     
 
     def name(self):
@@ -100,6 +101,7 @@ class UNet(nn.Module):
             x = decoder_step(x, skip_cons[i])
 
         x = self.final_conv(x)
+        x = self.sigmoid(x)
         return x
 
 # Example usage

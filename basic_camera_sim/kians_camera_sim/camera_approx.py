@@ -21,7 +21,7 @@ class CameraApprox(nn.Module):
     Image noise and blur is calibrated for images ~ 1024x1024 in size
     """
 
-    def __init__(self, input_max=255, output_max=None):
+    def __init__(self, input_max=255.0, output_max=None):
         super(CameraApprox, self).__init__()
         
         self.input_max = input_max

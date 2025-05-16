@@ -76,6 +76,12 @@ class NoiseModule(nn.Module):
         return noise(cxr, self.strength, self.min_signal)
 
 
+# ------ Donwsize ------
+
+def mean_downsample(img, k=2):
+    pool = nn.AvgPool2d(k).to(img.device)
+    return pool(img)
+
 # ------ CameraDistort ------
 from torchvision.transforms import GaussianBlur
 
@@ -106,14 +112,15 @@ class CameraDistort(nn.Module):
 # ------ Denoise / Filtering ------
 
 class MedianFilter(nn.Module):
-    def __init__(self, device, kernel_size=3):
+    def __init__(self, kernel_size=3, device="cpu" ):
         super().__init__()
         self.kernel_size = kernel_size
         self.device = device
 
     def forward(self, x):
+        src_device = x.device
         x = median_filter_lambda(x.to(self.device), self.kernel_size)
-        return x.to(self.device)
+        return x.to(src_device)
 
 median_filter_lambda = lambda x, k: F.pad(x.unfold(-2, k, 1).unfold(-2, k, 1).flatten(-2).median(-1)[0], (k // 2,) * 4, "replicate")
 

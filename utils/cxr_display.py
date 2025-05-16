@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 
-def plot_cxr_images(images, titles, figsize=(12, 4)):
+def plot_cxr_images(images, titles, figsize=(12, 4), vmin=0.0, vmax=1.0):
     """
     Plots CXR images (as PyTorch tensors) in grayscale side by side with titles.
     
@@ -24,10 +24,9 @@ def plot_cxr_images(images, titles, figsize=(12, 4)):
         
         img = img.detach().cpu().numpy()
         
-        ax.imshow(img.squeeze(), cmap='gray')
+        ax.imshow(img.squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
         ax.set_title(titles[i], fontsize=10)
         ax.axis('off')
-
     plt.subplots_adjust(wspace=0.01, hspace=0)
     plt.tight_layout(pad=0.5)
     plt.show()

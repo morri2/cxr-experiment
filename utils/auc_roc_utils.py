@@ -24,7 +24,6 @@ def setup_roc_plot(title="ROC Curve"):
     ax.grid(True)
     return fig, ax
 
-
 def add_roc_curve(ax: Axes, fpr_tpr, label=None, color=None, linestyle="-", lw=2, alpha=0.8, auc_in_label=False):
     """Add a ROC curve to an existing plot."""
     fpr, tpr = fpr_tpr

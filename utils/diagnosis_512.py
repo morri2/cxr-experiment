@@ -119,18 +119,44 @@ if __name__ == "__main__":
     import camera_approx
     import auc_roc_utils
     import matplotlib.pylab as plt
+    import cxr_display
+    import cxr_processing
+
+    dataset = NIH_Dataset("../data/NIH_data", split="test")
+    camera_approx = camera_approx.CameraApprox(1.0)
+    median_filter = cxr_processing.MedianFilter(7)
+
+    # Show example images
+    for i in range(3):
+        cxr_display.plot_cxr_images([dataset[i][0], camera_approx(dataset[i][0]), median_filter( camera_approx(dataset[i][0]))], ["clean", "noisy", f"median(k={median_filter.kernel_size})"], figsize=(20, 60)) # show example
+        plt.show()
+        downsample_clean = cxr_processing.mean_downsample(dataset[i][0], 2)
+        downsample_noisy = cxr_processing.mean_downsample(camera_approx(dataset[i][0]), 2)
+        cxr_display.plot_cxr_images([downsample_clean, downsample_noisy, ], ["clean", "noisy"], figsize=(20, 40)) # show example
+        plt.show()
+
+    
+    
+
 
 
     print("test!")
-    dataset = NIH_Dataset("../data/NIH_data", split="test")
+    
     print(len(dataset))
     tester = NihTester(dataset)
     print(tester.diagnosis_model.targets)
 
-    rocs_noisy = tester.rocs(camera_approx.CameraApprox(1.0))
-    print("noisy:", rocs_noisy.total_auc_score())
+    # ROCs
+    rocs_median = tester.rocs(nn.Sequential(camera_approx, median_filter))
+    print("median:", rocs_median.total_auc_score())   
+
     rocs_clean = tester.rocs()
-    print("clean:", rocs_clean.total_auc_score())
+    print("clean:", rocs_clean.total_auc_score())    
+
+    rocs_noisy = tester.rocs(camera_approx)
+    print("noisy:", rocs_noisy.total_auc_score())
+
+
     
     fig, ax = auc_roc_utils.setup_roc_plot("Noisy vs Clean ROC")
     

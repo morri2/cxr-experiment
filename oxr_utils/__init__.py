@@ -3,4 +3,7 @@ from .cxr_plt import *
 from .cxr_processing import *
 from .diagnosis_512 import *
 from .unet import *
+from .cxr_loss import *
+from .res_unet import *
 from .nih_dataset import *
+from .patch_dataset import *

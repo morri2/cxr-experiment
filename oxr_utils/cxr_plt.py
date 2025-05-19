@@ -45,6 +45,33 @@ def plot_cxr_images(images, titles, figsize=(12, 4), vmin=0.0, vmax=1.0):
     plt.tight_layout(pad=0.5)
     plt.show()
 
+def plot_cxr_res(images, figsize=(12, 4), vmin=0.0, vmax=1.0):
+    titles = ["Clean", "Noisy", "Residual", "Restored"]
+    if len(images) != len(titles):
+        print("WRONG NUMBER OF IMAGES")
+
+    n = len(images)
+    fig, axes = plt.subplots(1, n, figsize=figsize)
+
+    if n == 1:
+        axes = [axes]
+
+    for i, ax in enumerate(axes):
+        img = images[i]
+        
+        img = img.detach().cpu().numpy()
+
+
+        if titles[i] == "Residual":
+            ax.imshow(img.squeeze(), cmap='gray')
+        else:
+            ax.imshow(img.squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
+        ax.set_title(titles[i], fontsize=10)
+        ax.axis('off')
+    plt.subplots_adjust(wspace=0.01, hspace=0)
+    plt.tight_layout(pad=0.5)
+    plt.show()
+
 
 # ------ ROC Curve Plotting ------
 

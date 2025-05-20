@@ -1,4 +1,4 @@
-import torchxrayvision as xrv
+#import torchxrayvision as xrv
 import torch
 from torch import Tensor
 from torch.utils.data import DataLoader

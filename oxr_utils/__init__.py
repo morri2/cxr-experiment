@@ -7,3 +7,4 @@ from .cxr_loss import *
 from .res_unet import *
 from .nih_dataset import *
 from .patch_dataset import *
+from .cxr_loss import *

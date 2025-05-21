@@ -45,29 +45,46 @@ def plot_cxr_images(images, titles, figsize=(12, 4), vmin=0.0, vmax=1.0):
     plt.tight_layout(pad=0.5)
     plt.show()
 
-def plot_cxr_res(images, figsize=(12, 4), vmin=0.0, vmax=1.0):
+def plot_cxr_res(clean,noisy,output, residual=None, figsize=(12, 8), vmin=0.0, vmax=1.0):
     titles = ["Clean", "Noisy", "Residual", "Restored"]
-    if len(images) != len(titles):
-        print("WRONG NUMBER OF IMAGES")
+    if residual is None:
+        residual = output - noisy
 
-    n = len(images)
-    fig, axes = plt.subplots(1, n, figsize=figsize)
+    true_residual = clean - noisy
 
-    if n == 1:
-        axes = [axes]
+    residual_diff = residual - true_residual
+    
+    fig, axes = plt.subplots(2,3, figsize=figsize)
+    
+    # --- imgs ---
+    axes[0, 0].imshow(clean.detach().cpu().squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
+    axes[0, 0].set_title("Clean", fontsize=10)
+    axes[0, 0].axis('off')
 
-    for i, ax in enumerate(axes):
-        img = images[i]
-        
-        img = img.detach().cpu().numpy()
+    axes[0, 1].imshow(noisy.detach().cpu().squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
+    axes[0, 1].set_title("Noisy", fontsize=10)
+    axes[0, 1].axis('off')
 
+    axes[0, 2].imshow(output.detach().cpu().squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
+    axes[0, 2].set_title("Restored", fontsize=10)
+    axes[0, 2].axis('off')
 
-        if titles[i] == "Residual":
-            ax.imshow(img.squeeze(), cmap='gray')
-        else:
-            ax.imshow(img.squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
-        ax.set_title(titles[i], fontsize=10)
-        ax.axis('off')
+    # --- res ---
+    rvmax = max(abs(residual.min().item()), abs(residual.max().item()))
+    rvmin = -rvmax
+
+    axes[1, 0].imshow(true_residual.detach().cpu().squeeze(), cmap='seismic', vmin=rvmin, vmax=rvmax)
+    axes[1, 0].set_title("True Residual", fontsize=10)
+    axes[1, 0].axis('off')
+    
+    axes[1, 1].imshow(residual.detach().cpu().squeeze(), cmap='seismic', vmin=rvmin, vmax=rvmax)
+    axes[1, 1].set_title("Residual", fontsize=10)
+    axes[1, 1].axis('off')
+
+    axes[1, 2].imshow(residual_diff.detach().cpu().squeeze(), cmap='seismic', vmin=rvmin, vmax=rvmax)
+    axes[1, 2].set_title("Diff", fontsize=10)
+    axes[1, 2].axis('off')
+
     plt.subplots_adjust(wspace=0.01, hspace=0)
     plt.tight_layout(pad=0.5)
     plt.show()

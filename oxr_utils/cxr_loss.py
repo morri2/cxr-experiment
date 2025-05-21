@@ -71,28 +71,49 @@ class SSIMLoss(nn.Module):
         
         return ssim_loss
 
+
+
+import torch
+import torch.nn.functional as F
+
+def sobel_gradient(img):
+    sobel_x = torch.tensor([[-1, 0, 1],
+                            [-2, 0, 2],
+                            [-1, 0, 1]], dtype=img.dtype, device=img.device).reshape(1, 1, 3, 3)
+
+    sobel_y = torch.tensor([[-1, -2, -1],
+                            [ 0,  0,  0],
+                            [ 1,  2,  1]], dtype=img.dtype, device=img.device).reshape(1, 1, 3, 3)
+
+    grad_x = F.conv2d(img, sobel_x, padding=1)
+    grad_y = F.conv2d(img, sobel_y, padding=1)
+
+    return grad_x, grad_y
+
+
 class GradientLoss(nn.Module):
     """
+    Uses Sobel, which is a good gradient approximation for images.
     Losstype = "mse" or "l1"
     """
     def __init__(self, device="cuda", loss_type="l1"):
         super(GradientLoss, self).__init__()
         self.device = device
-        self.loss_type = ""
+        self.loss_type = loss_type
         
     def forward(self, outputs, targets):
         outputs = outputs.to(self.device)
         targets = targets.to(self.device)
 
-        pred_grad_x, pred_grad_y = torch.gradient(pred)
-        target_grad_x, target_grad_y = torch.gradient(target)
+        outputs_grad_x, pred_grad_y = sobel_gradient(outputs)
+        targets_grad_x, target_grad_y = sobel_gradient(targets)
 
         if self.loss_type == 'l1':
-            loss = F.l1_loss(pred_grad_x, target_grad_x) + F.l1_loss(pred_grad_y, target_grad_y)
+            loss = F.l1_loss(outputs_grad_x, targets_grad_x) + F.l1_loss(pred_grad_y, target_grad_y)
         elif self.loss_type == 'mse':
-            loss = F.mse_loss(pred_grad_x, target_grad_x) + F.mse_loss(pred_grad_y, target_grad_y)
+            loss = F.mse_loss(outputs_grad_x, targets_grad_x) + F.mse_loss(pred_grad_y, target_grad_y)
         else:
-            print("invalid losstype")
+            raise ValueError("Invalid loss type. Choose 'l1' or 'mse'.")
         return loss
     
 
@@ -102,12 +123,12 @@ class CombinedLoss(nn.Module):
         if loss_weights is None:
             loss_weights = [1.0/len(loss_fns) for _ in range(len(loss_fns))]
         self.loss_weights = loss_weights
-        self.loss_fns = [loss_fns.to(device) for loss_fn in loss_fns]
-        
-
+        self.loss_fns = [loss_fn.to(device) for loss_fn in loss_fns] if device else loss_fns
+        self.device = device
+      
     def forward(self, outputs, targets):
-        outputs = outputs.to(self.device)
-        targets = targets.to(self.device)
+        outputs = outputs.to(self.device) if self.device else outputs
+        targets = targets.to(self.device) if self.device else targets
 
         total_loss = 0.0
         for loss_fn, loss_w in zip(self.loss_fns, self.loss_weights):

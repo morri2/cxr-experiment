@@ -39,7 +39,7 @@ def plot_cxr_images(images, titles, figsize=(12, 4), vmin=0.0, vmax=1.0):
         img = img.detach().cpu().numpy()
         
         ax.imshow(img.squeeze(), cmap='gray', vmin=vmin, vmax=vmax)
-        ax.set_title(titles[i], fontsize=10)
+        ax.set_title(titles[i], fontsize=14)
         ax.axis('off')
     plt.subplots_adjust(wspace=0.01, hspace=0)
     plt.tight_layout(pad=0.5)

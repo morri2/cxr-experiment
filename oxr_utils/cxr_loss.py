@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#import torchxrayvision as xrv
+import torchxrayvision as xrv
 from torchmetrics import StructuralSimilarityIndexMeasure
 from .cxr_processing import norm_to_xrv
 
@@ -17,7 +17,7 @@ class DiagnosticLoss(nn.Module):
 
         self.num_classes = num_classes
         self.device = device
-        #self.diagnosis_model = xrv.models.ResNet(weights="resnet50-res512-all").to(self.device)
+        self.diagnosis_model = xrv.models.ResNet(weights="resnet50-res512-all").to(self.device)
         self.criterion = nn.BCEWithLogitsLoss()
 
 
@@ -135,6 +135,7 @@ class CombinedLoss(nn.Module):
             total_loss += loss_w * loss_fn(outputs, targets)
         
         return total_loss
+
 
 L1Loss = nn.L1Loss
 MSELoss = nn.MSELoss
